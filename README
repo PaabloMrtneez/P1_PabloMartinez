@@ -1,1 +1,176 @@
-Hola
+# Proyecto Unity — Plataformas y Control del Player
+
+## 1. Requisitos implementados
+
+# Paso 1 — Configuración del Rigidbody del Player (anti-vuelco)
+
+## 1.1 Rigidbody del Player
+- **Qué componentes tiene el Player:** (Rigidbody, Collider, etc.)
+- **Ajustes del Rigidbody:**
+  - Mass:
+  - Drag / Angular Drag:
+  - Use Gravity:
+  - Interpolate:
+  - Collision Detection:
+
+## 1.2 Bloqueo de rotaciones
+- **Rotaciones bloqueadas (X/Y/Z):**
+- **Motivo:** (por qué esos ejes y qué problema evita)
+
+## 1.3 Tags y Layers usados
+- **Tag del Player:**  
+- **Layer del Player (si aplica):**  
+
+---
+
+# Paso 2 — Script de control del Player (PlayerController)
+
+## 2.1 Estructura general del script
+- **Nombre del script:** PlayerController  
+- **Dónde está asignado:** (GameObject del Player)
+- **Referencia al Rigidbody:** (cómo la obtienes: GetComponent)
+
+## 2.2 Lectura de input (WASD / flechas)
+- **Inputs usados:** Horizontal / Vertical
+- **Cómo se combinan:** (Vector2 o valores separados)
+
+## 2.3 Cálculo de dirección de movimiento
+- **Cómo calculo la dirección:** (normalización, vector, etc.)
+- **Qué significa para el movimiento:** (movimiento relativo a mundo o al player)
+
+## 2.4 Movimiento con Rigidbody (framerate independiente)
+- **Dónde aplico el movimiento:** (Update / FixedUpdate)
+- **Método usado:** (velocity / AddForce / MovePosition)
+- **Cómo garantizo independencia del framerate:** (Time.deltaTime / FixedDeltaTime)
+
+## 2.5 Sprint (opcional)
+- **Tecla usada:** Shift
+- **Cómo aumenta la velocidad:** (multiplicador / variable)
+- **Limitaciones (si hay):** (sin stamina / con stamina / cooldown, etc.)
+
+## 2.6 Rotación hacia la dirección de movimiento (opcional)
+- **Cómo hago que mire hacia donde se mueve:**  
+- **Suavizado (si hay):** (lerp/slerp/turn speed)
+
+## 2.7 Animator (opcional)
+- **Animator Controller:** (nombre / ubicación)
+- **Estados:** Idle / Walk / Jump
+- **Parámetros usados:** (Speed, IsGrounded, etc.)
+- **Cómo se actualizan:** (desde script)
+
+---
+
+# Paso 3 — Salto con físicas simples
+
+## 3.1 Fuerza de salto
+- **Variable usada:** jumpForce =  
+- **Cómo se aplica:** (AddForce / velocity)
+
+## 3.2 Detección de suelo (Ground Check)
+- **Cómo detecto el suelo:** (OnCollisionEnter/Stay/Exit o Raycast)
+- **Tag del suelo:**  
+- **Variable booleana:** isGrounded
+- **Casos especiales:** (pendientes, bordes, etc.)
+
+## 3.3 Evitar saltos infinitos
+- **Condición para saltar:** (solo si isGrounded)
+- **Qué pasa si se pulsa en el aire:**  
+
+## 3.4 Doble salto (opcional)
+- **¿Está implementado?:** Sí / No
+- **Regla del doble salto:** (1 extra en el aire, reset al tocar suelo)
+- **Variables usadas:** (hasDoubleJumped o contador)
+
+---
+
+# Paso 4 — Cámara dentro del Player (tercera persona)
+
+## 4.1 Configuración de cámara
+- **Cómo la creé:** (Camera existente o nueva)
+- **Jerarquía:** Camera como hija del Player
+- **Posición/rotación local:** (valores o descripción)
+- **Resultado visual:** (qué se ve y por qué ese ángulo)
+
+## 4.2 Ajustes extra (si aplica)
+- **FOV:**  
+- **Clipping planes:**  
+- **Suavizado / seguimiento:** (si lo implementaste)
+
+---
+
+# Paso 4 — Plataformas básicas
+
+## 5.1 Creación de plataformas
+- **Assets usados:** (proporcionados / propios)
+- **Transformaciones:** (escala/posición/rotación)
+
+## 5.2 Filosofía de objeto padre + modelo hijo
+- **Objeto padre:** contiene collider (y rigidbody si aplica)
+- **Modelo hijo:** solo visual
+- **Ventajas:** (colliders limpios, reemplazar modelo, etc.)
+
+## 5.3 Colliders y detección de suelo
+- **Tipo de collider usado:** (Box, Mesh, Capsule, etc.)
+- **Tag asignado a plataformas:** (Ground / Platform / etc.)
+- **Verificación:** (cómo comprobaste que el player aterriza bien)
+
+## 5.4 Prefabs
+- **Prefabs creados:** (lista)
+- **Por qué usar prefabs:** (reutilización, consistencia)
+
+## 5.5 Recorrido del nivel
+- **Qué recorrido monté:** (descripción breve)
+- **Objetivo jugable:** (saltar de A a B, etc.)
+
+---
+
+# Paso 5 — Plataformas con comportamiento
+
+## 6. Tipo A — Plataforma móvil (MovingPlatform)
+
+### 6.1 Configuración del prefab
+- **Rigidbody:** Is Kinematic = true / Use Gravity = false
+- **Collider:** (tipo y configuración)
+- **Script:** MovingPlatform asignado al objeto padre
+
+### 6.2 Lógica de movimiento
+- **Posición inicial guardada:** (cómo)
+- **Posición final / objetivo:** (GameObject referencia o dirección)
+- **Velocidad configurable:** (variable pública/serialized)
+- **Movimiento continuo y repetitivo:** (ping-pong / lerp / MoveTowards)
+- **Framerate independiente:** (Time.deltaTime)
+
+### 6.3 Instancias en el nivel
+- **Cuántas hay:**  
+- **Parámetros distintos por instancia:** (distancia, velocidad, dirección)
+
+### 6.4 (Opcional) Mantener al jugador encima
+- **¿Implementado?:** Sí / No
+- **Cómo lo resolví:** (parenting temporal / sumar desplazamiento / etc.)
+
+---
+
+## 7. Tipo B — Plataforma que cae (FallingPlatform)
+
+### 7.1 Configuración del prefab
+- **Rigidbody:** Is Kinematic = true / Use Gravity = false (al inicio)
+- **Collider:**  
+- **Script:** FallingPlatform
+
+### 7.2 Activación al pisar
+- **Cómo detecto al jugador:** (colisión / trigger)
+- **Condición “solo desde arriba” (opcional):** (cómo lo controlas)
+
+### 7.3 Retardo antes de caer
+- **Tiempo de retardo:** (0.5–1s)
+- **Cómo mido el tiempo:** (Time.time / coroutine / timer)
+
+### 7.4 Caída y límite inferior
+- **Velocidad de caída:**  
+- **Altura mínima / condición de stop:** (Y mínima o referencia)
+
+### 7.5 Reset a posición inicial
+- **Tiempo de espera tras caer:**  
+- **Cómo vuelve:** (teleport / lerp / reset variables)
+- **Reutilización:** vuelve a funcionar desde cero
+
