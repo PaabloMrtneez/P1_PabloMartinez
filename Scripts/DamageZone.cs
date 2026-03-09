@@ -38,11 +38,7 @@ public class DamageZone : MonoBehaviour
 
         if (!playersInContact.Add(player))
             return;
-
-        if (GameManagerClass.instancia == null)
-            return;
-
-        GameManagerClass.instancia.LoseLife();
+        player.ReceiveDamage();
     }
 
     private void HandleExit(GameObject otherObject)

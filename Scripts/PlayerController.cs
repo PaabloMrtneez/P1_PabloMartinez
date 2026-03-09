@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     private bool teclaSprintPresionada = false;
     private bool saltoEnAire = false;
     private float proximoDamagePermitido = 0f;
+    private Vector3 respawnPosition;
+    private Quaternion respawnRotation;
 
     private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
     private static readonly int IsSprintingHash = Animator.StringToHash("isSprinting");
@@ -42,6 +44,8 @@ public class PlayerController : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         rotacionObjetivo = rb.rotation;
+        respawnPosition = transform.position;
+        respawnRotation = transform.rotation;
     }
 
     private void Update()
@@ -133,6 +137,27 @@ public class PlayerController : MonoBehaviour
 
         if (GameManagerClass.instancia != null)
             GameManagerClass.instancia.LoseLife();
+    }
+
+    public void Respawn()
+    {
+        transform.SetPositionAndRotation(respawnPosition, respawnRotation);
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        rotacionObjetivo = respawnRotation;
+        entradaMovimiento = 0f;
+        teclaSprintPresionada = false;
+        estaEnSuelo = false;
+        saltoEnAire = false;
+        haDobleSaltado = false;
+        proximoDamagePermitido = Time.time + tiempoInvulnerable;
+
+        if (animator != null)
+        {
+            animator.SetBool(IsMovingHash, false);
+            animator.SetBool(IsSprintingHash, false);
+        }
     }
 
     private void OnCollisionEnter(Collision colision)
