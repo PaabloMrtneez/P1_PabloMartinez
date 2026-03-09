@@ -23,10 +23,7 @@ public class FallingPlatformClase : MonoBehaviour
     private void Start()
     {
         posicionInicial = transform.position;
-
         posicionFinal = destino.transform.position;
-           
-
         rb = GetComponent<Rigidbody>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
