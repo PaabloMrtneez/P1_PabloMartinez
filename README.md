@@ -12,15 +12,14 @@ Este proyecto es un juego de plataformas 3D hecho en Unity. El jugador controla 
 
 ## Caracteristicas principales
 
-- Movimiento del personaje con avance, retroceso y giro por pasos.
-- Sprint para recorrer el nivel mas rapido.
-- Salto y doble salto.
+- Movimiento del personaje con avance, retroceso doble salto e sprint.
 - Sistema de checkpoints para actualizar el punto de respawn.
 - Plataformas moviles que hacen recorridos de ida y vuelta.
 - Plataformas que caen cuando el jugador las pisa y luego regresan.
-- Coleccion de monedas con contador en pantalla.
-- Zonas de dano que restan vidas al jugador.
+- Monedas a recoger durante el nivel.
+- Un vacio que hace daño al jugador. Si el jugador se cae respawnea en el yultimo checkpoint.
 - Interfaz que muestra monedas y estado de vida.
+- Escenas de victoria y derrota y menu principal.
 
 ## Controles
 
@@ -44,9 +43,9 @@ Las monedas recogidas se acumulan durante la partida actual y se muestran en la 
 ## Escenas incluidas
 
 - `Assets/Scenes/MainMenu.unity`: menu principal y boton para empezar la partida.
-- `Assets/Scenes/juego.unity`: nivel principal con plataformas, hazards, coleccionables y checkpoints.
+- `Assets/Scenes/juego.unity`: nivel principal con plataformas, hazards, monedas y checkpoints.
 - `Assets/Scenes/muerte.unity`: pantalla de derrota con opciones para reintentar o volver al menu.
-- `Assets/Scenes/victoria.unity`: pantalla final al completar el nivel.
+- `Assets/Scenes/victoria.unity`: pantalla final al llegar a la meta.
 
 ## Scripts principales
 
