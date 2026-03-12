@@ -12,11 +12,6 @@ public class UI : MonoBehaviour
         TryBindGameManager();
     }
 
-    private void Start()
-    {
-        TryBindGameManager();
-    }
-
     private void Update()
     {
         if (gameManager == null && GameManagerClass.instancia != null)

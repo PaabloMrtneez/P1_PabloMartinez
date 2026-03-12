@@ -1,30 +1,28 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private const string GroundTag = "Ground";
+
     [SerializeField] private float velocidad = 5.0f;
     [SerializeField] private float gradosPorGiro = 90f;
     [SerializeField] private float velocidadGiro = 360f;
     [SerializeField] private float fuerzaSalto = 5.0f;
     [SerializeField] private float multiplicadorSprint = 3.0f;
     [SerializeField] private Animator animator;
-    [SerializeField] private float tiempoInvulnerable = 0.5f;
 
     private Rigidbody rb;
-    private bool estaEnSuelo = false;
-    private bool haDobleSaltado = false;
-    private float entradaMovimiento = 0f;
-    private bool teclaSprintPresionada = false;
-    private bool saltoEnAire = false;
-    private float proximoDamagePermitido = 0f;
+    private bool estaEnSuelo;
+    private bool haDobleSaltado;
+    private float entradaMovimiento;
+    private bool teclaSprintPresionada;
+    private bool saltoEnAire;
     private Vector3 respawnPosition;
     private Quaternion respawnRotation;
 
     private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
     private static readonly int IsSprintingHash = Animator.StringToHash("isSprinting");
     private static readonly int JumpHash = Animator.StringToHash("jump");
-
-    public int coins = 0;
 
     // Rotacion
     private Quaternion rotacionObjetivo;
@@ -50,45 +48,10 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // Giro
-        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
-            AnadirGiro(gradosPorGiro);
-
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
-            AnadirGiro(-gradosPorGiro);
-
-        // Movimiento
-        entradaMovimiento = 0f;
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
-            entradaMovimiento = 1f;
-        else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
-            entradaMovimiento = -1f;
-
-        // Sprint
-        teclaSprintPresionada = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
-        if (animator != null)
-        {
-            bool estaMoviendose = Mathf.Abs(entradaMovimiento) > 0.1f;
-            bool estaSprintfando = estaMoviendose && teclaSprintPresionada && entradaMovimiento > 0.1f;
-            animator.SetBool(IsMovingHash, estaMoviendose);
-            animator.SetBool(IsSprintingHash, estaSprintfando);
-        }
-
-        // Salto
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (estaEnSuelo)
-            {
-                EjecutarSalto();
-                haDobleSaltado = false;
-            }
-            else if (!haDobleSaltado)
-            {
-                EjecutarSalto();
-                haDobleSaltado = true;
-            }
-        }
+        ProcesarGiro();
+        ProcesarMovimiento();
+        ActualizarAnimator();
+        ProcesarSalto();
     }
 
     private void FixedUpdate()
@@ -115,28 +78,73 @@ public class PlayerController : MonoBehaviour
         rotacionObjetivo = rotacionObjetivo * paso;
     }
 
+    private void ProcesarGiro()
+    {
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
+            AnadirGiro(gradosPorGiro);
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
+            AnadirGiro(-gradosPorGiro);
+    }
+
+    private void ProcesarMovimiento()
+    {
+        entradaMovimiento = 0f;
+
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+            entradaMovimiento = 1f;
+        else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+            entradaMovimiento = -1f;
+
+        teclaSprintPresionada = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+    }
+
+    private void ActualizarAnimator()
+    {
+        if (animator == null)
+            return;
+
+        bool estaMoviendose = Mathf.Abs(entradaMovimiento) > 0.1f;
+        animator.SetBool(IsMovingHash, estaMoviendose);
+        animator.SetBool(
+            IsSprintingHash,
+            estaMoviendose && teclaSprintPresionada && entradaMovimiento > 0.1f
+        );
+    }
+
+    private void ProcesarSalto()
+    {
+        if (!Input.GetKeyDown(KeyCode.Space))
+            return;
+
+        if (!estaEnSuelo && haDobleSaltado)
+            return;
+
+        EjecutarSalto();
+        haDobleSaltado = !estaEnSuelo;
+    }
+
     private void EjecutarSalto()
     {
         if (animator != null)
             animator.SetTrigger(JumpHash);
 
         saltoEnAire = true;
-
-        Vector3 v = rb.linearVelocity;
-        v.y = 0f;
-        rb.linearVelocity = v;
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         rb.AddForce(Vector3.up * fuerzaSalto, ForceMode.Impulse);
     }
 
     public void ReceiveDamage()
     {
-        if (Time.time < proximoDamagePermitido) return;
-
-        proximoDamagePermitido = Time.time + tiempoInvulnerable;
-
         if (GameManagerClass.instancia != null)
             GameManagerClass.instancia.LoseLife();
+    }
+
+    public void SetRespawnPoint(Vector3 nuevaPosicion, Quaternion nuevaRotacion)
+    {
+        respawnPosition = nuevaPosicion;
+        respawnRotation = nuevaRotacion;
     }
 
     public void Respawn()
@@ -151,7 +159,6 @@ public class PlayerController : MonoBehaviour
         estaEnSuelo = false;
         saltoEnAire = false;
         haDobleSaltado = false;
-        proximoDamagePermitido = Time.time + tiempoInvulnerable;
 
         if (animator != null)
         {
@@ -162,28 +169,32 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision colision)
     {
-        if (colision.gameObject.CompareTag("Ground"))
+        if (EsSuelo(colision))
         {
             estaEnSuelo = true;
             haDobleSaltado = false;
             saltoEnAire = false;
         }
-
     }
 
     private void OnCollisionStay(Collision colision)
     {
-        if (colision.gameObject.CompareTag("Ground"))
+        if (EsSuelo(colision))
             estaEnSuelo = true;
     }
 
     private void OnCollisionExit(Collision colision)
     {
-        if (colision.gameObject.CompareTag("Ground"))
+        if (EsSuelo(colision))
         {
             estaEnSuelo = false;
             if (!saltoEnAire && animator != null)
                 animator.SetTrigger(JumpHash);
         }
+    }
+
+    private static bool EsSuelo(Collision colision)
+    {
+        return colision.gameObject.CompareTag(GroundTag);
     }
 }

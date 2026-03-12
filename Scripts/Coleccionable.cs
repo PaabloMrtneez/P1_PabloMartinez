@@ -2,21 +2,21 @@ using UnityEngine;
 
 public class Coleccionable : MonoBehaviour
 {
-    private bool fueRecogido = false;
+    private bool fueRecogido;
 
     private void OnTriggerEnter(Collider other)
     {
-        PlayerController jugador = other.GetComponentInParent<PlayerController>();
-        if (jugador != null)
-        {
-            fueRecogido = true;
-            Destroy(gameObject);
-        }
-    }
+        if (fueRecogido)
+            return;
 
-    private void OnDestroy()
-    {
-        if (fueRecogido && GameManagerClass.instancia != null)
+        if (other.GetComponentInParent<PlayerController>() == null)
+            return;
+
+        fueRecogido = true;
+
+        if (GameManagerClass.instancia != null)
             GameManagerClass.instancia.AddMoneda();
+
+        Destroy(gameObject);
     }
 }
